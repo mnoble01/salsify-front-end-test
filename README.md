@@ -1,10 +1,12 @@
 # salsify-front-end-test
 
+Setup with `npm install`
+
 Build with `gulp build`
 
 Test with `gulp test`
 
-Run with `gulp server`
+Run with `gulp server`, localhost:3000
 
 Make changes with `gulp watch`
 
