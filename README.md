@@ -1,7 +1,22 @@
-# Product Filtering Condition Editor UI
+# salsify-front-end-test
+
+Build with `gulp build`
+
+Test with `gulp test`
+
+Run with `gulp server`
+
+Make changes with `gulp watch`
+
+
+
+
+# Salsify Project Instructions
+
+## Product Filtering Condition Editor UI
 A Coding Exercise for UI Developers
 
-# Introduction
+## Introduction
 
 Many capabilities of Salsify are built around filtered sets of products. Products at Salsify consist of properties and their values. Properties have a datatype.
 
@@ -13,7 +28,7 @@ To complete this exercise please build a user interface to create a filter and u
 
 Provide us with an archive containing the results of your work and a README file with a guided tour of your work, notes on your development process, how long you spent on the exercise, what assumptions you made, etc.  If you wish, this may also be presented as a live site.  In that case simply provide a link to the site and the README file mentioned above.
 
-# Specification
+## Specification
 
 This repository contains a mock `datastore` which includes sample products, property definitions including data types, and the complete set of filter operations. Using this datastore please create a web user interface with the following behavior:
 
@@ -21,11 +36,11 @@ This repository contains a mock `datastore` which includes sample products, prop
 * Filters have the form `[property name] [operator] [property value]`
 * Creating or updating a filter causes the the list of products to update
 
-# Tips and Recommendations
+## Tips and Recommendations
 - No other Operators or data types will be introduced; they are static.
 - Properties and Products vary from customer to customer, you cannot depend on having the same properties or products available each time this application loads
 
-## Properties Types/Operators
+### Properties Types/Operators
 
 Operators define the relationship between properties and property values. Certain operators are only valid for certain property types, operator behavior and valid operators for each property type are defined as follows:
 
