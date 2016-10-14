@@ -1,7 +1,6 @@
 import React, {Component} from 'react'
 import Backbone from 'backbone'
 import BackboneReactComponent from 'backbone-react-component'
-// import ProductCollection from 'collections/products'
 
 class Product extends Component {
   static propTypes = {

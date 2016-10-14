@@ -6,7 +6,6 @@ import {PropertyModel} from 'collections/properties'
 const ProductModel = Backbone.Model.extend({
   initialize () {
     this.display = this.display.bind(this)
-    // properties: value of a particular [property type]
   },
 
   display () {

@@ -193,16 +193,17 @@ form {
       display: block;
       float: left;
       margin: @padding/2 0 0 @padding;
-      .serial-input-wrapper {
+      button {
+        padding: 2px 5px;
         margin-left: @padding/2;
+      }
+      .property-value {
+        display: block;
+        float: left;
         clear: left;
         &:not(:first-child) {
           margin-top: @padding/2;
         }
-      }
-      button {
-        margin-left: @padding/2;
-        padding: 2px 5px;
       }
     }
   }

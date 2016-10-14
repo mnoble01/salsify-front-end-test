@@ -13,24 +13,32 @@ const OperatorModel = Backbone.Model.extend({
     return titleize(this.get('text'))
   },
 
-  // TODO maybe make this a PropertyValueModel
-  // Use this OperatorModel's operator function to compare a propertyValue
-  compare (propertyValue, value) {
-    switch (this.get('id')) {
-      case OperatorModel.EQUALS:
-        return propertyValue === value
-      case OperatorModel.GREATER_THAN:
-        return propertyValue > value
-      case OperatorModel.LESS_THAN:
-        return propertyValue < value
-      case OperatorModel.ANY:
+  // Given a PropertyValueModel return true if this operator is successfully applied to `value`
+  compare (propertyValueModel = null, value) {
+    const IDS = this.constructor.IDS
+    const propertyValue = propertyValueModel && propertyValueModel.get('value')
+    const isDefined = propertyValue !== null && propertyValue !== undefined
+    switch (this.id) {
+      case IDS.EQUALS: {
+        if (typeof propertyValue === 'string' && typeof value === 'string' && value) {
+          return isDefined && propertyValue.toLowerCase() === value.toLowerCase()
+        }
+        return isDefined && propertyValue === value
+      }
+      case IDS.GREATER_THAN:
+        return isDefined && propertyValue > value
+      case IDS.LESS_THAN:
+        return isDefined && propertyValue < value
+      case IDS.ANY:
         return true
-      case OperatorModel.NONE:
-        return propertyValue === null || propertyValue === undefined
-      case OperatorModel.IS_ANY_OF:
-        return includes(propertyValue, value) // array includes
-      case OperatorModel.CONTAINS:
-        return (propertyValue || '').includes(value) // string includes
+      case IDS.NONE:
+        return !isDefined
+      case IDS.IS_ANY_OF:
+        return isDefined && includes(value, propertyValue) // array includes
+      case IDS.CONTAINS: {
+        const rgx = new RegExp(value, 'i')
+        return isDefined && rgx.test(propertyValue) // string includes
+      }
       default:
         return false
     }
@@ -69,8 +77,8 @@ const OperatorCollection = Backbone.Collection.extend({
     })
   },
 
-  // Takes a Property.TYPE and returns a new collection,
-  // consisting of valid OperatorModels for the given type
+  // Takes a Property.TYPE and returns a new collection consisting of
+  // valid OperatorModels for the given type
   forPropertyType (type) {
     const ID = this.model.IDS
     switch (type) {

@@ -1,8 +1,7 @@
 import React, {Component} from 'react'
 import BackboneReactComponent from 'backbone-react-component'
 import {BasicForm, SelectField, InputField} from 'react-serial-forms'
-import ReactTags from 'react-tag-autocomplete'
-import includes from 'lodash/includes'
+import {uniqBy, sortBy} from 'lodash'
 
 import ProductCollection from 'collections/products'
 import {PropertyModel, PropertyCollection} from 'collections/properties'
@@ -25,11 +24,9 @@ export default class FilterProducts extends Component {
       propertyCollection: new PropertyCollection(),
       operatorCollection: new OperatorCollection(),
       filter: {},
-      propertyValueTags: []
+      addedPropertyValues: []
     }
     this.onSubmit = this.onSubmit.bind(this)
-    this.onTagDelete = this.onTagDelete.bind(this)
-    this.onTagAdd = this.onTagAdd.bind(this)
   }
 
   componentWillMount () {
@@ -42,6 +39,11 @@ export default class FilterProducts extends Component {
     e.preventDefault()
     this.refs.form.validate((errs) => {
       const filter = this.refs.form.serialize()
+      filter.propertyId = parseInt(filter.propertyId, 10)
+      console.log('number??', this.getSelectedPropertyType(), PropertyModel.TYPES.NUMBER)
+      if (this.getSelectedPropertyType() === PropertyModel.TYPES.NUMBER) {
+        filter.propertyValue = parseInt(filter.propertyValue, 10)
+      }
       console.log('filter', filter)
       if (errs) {
         console.info(errs)
@@ -65,14 +67,13 @@ export default class FilterProducts extends Component {
   renderProductList () {
     if (this.state.hasValidFilter) {
       const filteredModels = this.state.collection.filter((prod) => {
-        const {propertyId, operatorId, propertyValue} = this.state.filter
-        const productPropertyValue = prod.get('propertyValueCollection').findWhere({
+        let {propertyId, operatorId, propertyValue} = this.state.filter // eslint-disable-line prefer-const
+        const valueModel = prod.get('propertyValueCollection').findWhere({
           propertyId
         })
         const operatorModel = this.state.operatorCollection.get(operatorId)
-        return operatorModel.compare(productPropertyValue, propertyValue)
+        return operatorModel.compare(valueModel, propertyValue)
       })
-      console.log('filteredModels', filteredModels)
       const filteredCollection = new ProductCollection(filteredModels)
       return (<ProductList collection={filteredCollection} properties={this.state.propertyCollection} />)
     }
@@ -95,10 +96,14 @@ export default class FilterProducts extends Component {
     )
   }
 
+  // returns a string of the currently selected property id
+  getSelectedPropertyId () {
+    return parseInt(this.state.filter.propertyId, 10)
+  }
+
   // returns a string of the currently selected property type
   getSelectedPropertyType () {
-    const selectedPropertyId = parseInt(this.state.filter.propertyId, 10)
-    const selectedPropertyModel = this.state.propertyCollection.get(selectedPropertyId)
+    const selectedPropertyModel = this.state.propertyCollection.get(this.getSelectedPropertyId())
     return selectedPropertyModel && selectedPropertyModel.get('type')
   }
 
@@ -106,6 +111,10 @@ export default class FilterProducts extends Component {
   getSelectedOperatorId () {
     return this.state.filter.operatorId
   }
+
+  // getSelectedPropertyValue () {
+  //   return this.state.filter.propertyValue
+  // }
 
   getProperties () {
     return [
@@ -130,6 +139,7 @@ export default class FilterProducts extends Component {
   }
 
   renderPropertyValue () {
+    const propId = this.getSelectedPropertyId()
     const propType = this.getSelectedPropertyType()
     const opId = this.getSelectedOperatorId()
     const TYPES = PropertyModel.TYPES
@@ -143,41 +153,48 @@ export default class FilterProducts extends Component {
         return (
           <InputField type='text' name='propertyValue' validation='required' />
         )
+      // case OPS.IS_ANY_OF: {
+      //   // TODO string, number, enumerated
+      //   // tags for string/number
+      //   if (propType === TYPES.ENUMERATED) {
+      //     const propertyValues = []
+      //     // property values = products where product.get('propertyValueCollection') contains
+      //     // selected property
+      //     return (
+      //       <SelectField multiple={true} name='propertyValue' options={propertyValues} validation='required' />
+      //     )
+      //   }
+      //   if (!this.state.addedPropertyValues.length) {
+      //     // add empty property value to begin
+      //     this.addNewPropertyValue(opId, false)
+      //   }
+      //   return (
+      //     <div className='property-values'>
+      //       {this.state.addedPropertyValues.map(pv => pv)}
+      //       <button onClick={() => this.addNewPropertyValue(opId)} className='add' type='button'>+ Add</button>
+      //     </div>
+      //   )
+      //   // return <InputField type='text' name='propertyValue' validation='required' />
+      // }
+      case OPS.EQUALS:
       case OPS.IS_ANY_OF: {
-        // TODO string, number, enumerated
-        // tags for string/number
-        if (propType === TYPES.ENUMERATED) {
-          const propertyValues = []
-          // property values = products where product.get('propertyValueCollection') contains
-          // selected property
-          return (
-            <SelectField multiple={true} name='propertyValue' options={propertyValues} validation='required' />
-          )
-        }
+        let multiple = opId === OPS.IS_ANY_OF
+        let availablePropertyValues = []
+        this.state.collection.each((prod) => {
+          const pv = prod.get('propertyValueCollection').findWhere({propertyId: propId})
+          if (pv) {
+            availablePropertyValues.push({text: pv.display(), value: pv.get('value')})
+          }
+        })
+        availablePropertyValues = uniqBy(availablePropertyValues, 'value')
+        availablePropertyValues = sortBy(availablePropertyValues, 'text')
         return (
-          <ReactTags
-            tags={this.state.propertyValueTags}
-            handleDelete={this.onTagDelete}
-            handleAddition={this.onTagAdd}
-            autofocus={true}
-            placeholder=' '
-            minQueryLength={1000} />
-        )
-        // return <InputField type='text' name='propertyValue' validation='required' />
-      }
-      case OPS.EQUALS: {
-        if (propType === TYPES.ENUMERATED) {
-          // const propertyValues = this.state.
-          // property values = products where product.get('propertyValueCollection') contains
-          // selected property
-          const propertyValues = []
-          return (
-            <SelectField name='propertyValue' options={propertyValues} validation='required' />
-          )
-        }
-        const inputType = propType === TYPES.NUMBER ? 'number' : 'text'
-        return (
-          <InputField type={inputType} name='propertyValue' validation='required' />
+          <SelectField
+            onChange={this.onSubmit}
+            name='propertyValue'
+            multiple={multiple}
+            options={availablePropertyValues}
+            validation='required' />
         )
       }
       case OPS.ANY:
@@ -188,24 +205,29 @@ export default class FilterProducts extends Component {
     }
   }
 
-  onTagDelete (i) {
-    const propertyValueTags = this.state.propertyValueTags
-    propertyValueTags.splice(i, 1)
-    this.setState({
-      propertyValueTags
-    })
+  addNewPropertyValue (inputType, setState = true) {
+    const values = this.state.addedPropertyValues
+    const newKey = values.length
+    const propertyValueInput = (
+      <div className='property-value' key={newKey}>
+        <InputField type={inputType} validation='required' name={`propertyValues[${newKey}]`}/>
+        {newKey > 0 && <button onClick={() => this.removePropertyValue(newKey)} className='remove'>✕</button>}
+      </div>
+    )
+    values.push(propertyValueInput)
+    if (setState) {
+      this.setState({
+        addedPropertyValues: values
+      })
+      // , this.forceUpdate)
+    }
   }
 
-  onTagAdd (tag) {
-    const propertyValueTags = this.state.propertyValueTags
-    const existingTagNames = propertyValueTags.map(t => t.name)
-    console.log('onTagAdd', existingTagNames, tag)
-    if (!includes(existingTagNames, tag.name)) { // don't allow duplicates
-      // TODO discard non-numbers for when SELECTED PROPERTY IS NUMERIC
-      propertyValueTags.push(tag)
-      this.setState({
-        propertyValueTags
-      })
-    }
+  removePropertyValue (index) {
+    const values = this.state.addedPropertyValues
+    values.splice(index, 1)
+    this.setState({
+      addedPropertyValues: values
+    })
   }
 }
