@@ -1,10 +1,10 @@
 import Backbone from 'backbone'
-import bind from 'lodash/bind'
 import titleize from 'titleize'
+import DATASTORE from 'datastore'
 
 const PropertyModel = Backbone.Model.extend({
   initialize () {
-    bind(this, this.display)
+    this.display = this.display.bind(this)
   },
 
   display () {
@@ -28,8 +28,14 @@ const PropertyModel = Backbone.Model.extend({
 const PropertyCollection = Backbone.Collection.extend({
   model: PropertyModel,
 
-  fetch () {
-    return Backbone.$.resolve(window.getProperties())
+  fetch (options = {}) {
+    const models = DATASTORE.getProperties()
+    const method = options.reset ? 'reset' : 'set'
+
+    return Backbone.$.Deferred().resolve().done(() => { // eslint-disable-line new-cap
+      this[method](models, options)
+      this.trigger('sync', this, models, options)
+    })
   }
 })
 

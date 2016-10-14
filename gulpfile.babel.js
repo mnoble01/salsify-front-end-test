@@ -51,7 +51,13 @@ gulp.task('images', () => {
 gulp.task('js', () => {
   return browserify({
       debug: true,
-      paths: [DIRS.SRC]
+      paths: [DIRS.SRC],
+      shim: {
+        'datastore': {
+          path: 'src/lib/datastore.js',
+          exports: 'datastore'
+        }
+      }
     })
     .transform(babelify, {
       sourceMaps: false,

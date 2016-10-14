@@ -16,7 +16,7 @@ describe('(Container) App', () => {
     expect(wrapper().find('#sidebar h4').length).toBe(1)
   })
 
-  it('has a content div', () => {
+  it('has a #content div', () => {
     expect(wrapper().find('#content').length).toBe(1)
   })
 })

@@ -20,6 +20,7 @@
     "backbone-react-component": "^0.10.0",
     "browser-sync": "^2.17.3",
     "browserify": "^13.1.0",
+    "browserify-shim": "^3.8.12",
     "enzyme": "^2.4.1",
     "eslint-config-airbnb-base": "^8.0.0",
     "eslint-plugin-import": "^2.0.1",
@@ -49,9 +50,19 @@
     "titleize": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
-  "babel": {
-    "presets": [
-      "es2015"
-    ]
+  "browserify-shim": {
+    "datastore": {
+      "path": "src/lib/datastore.js",
+      "exports": "datastore"
+    }
+  },
+  "browser": {
+    "datastore": "./src/lib/datastore.js"
+  },
+  "browserify-shim": {
+    "datastore": "datastore"
+  },
+  "browserify": {
+    "transform": ["browserify-shim"]
   }
 }
