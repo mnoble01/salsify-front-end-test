@@ -1,15 +1,35 @@
 # salsify-front-end-test
 
-Setup with `npm install`
+# Personalize
+- Edit `package.json`
+  - `name`
+  - `description`
+  - `repository.url`
+- Add `src/favicon.ico` file
+- Edit `src/index.html`
+  - `<title>`
 
-Build with `gulp build`
+# Commands
+#### Setup
+`npm install`
 
-Test with `gulp test`
+#### Build
+`gulp build`
 
-Run with `gulp server`, localhost:3000
+#### Test
+`gulp test`
 
-Make changes with `gulp watch`
+#### Lint
+`gulp lint`
 
+#### Run
+`gulp server`, on localhost:3000
+
+#### Make changes
+`gulp watch`
+
+#### Deploy to GH Pages
+`gulp deploy` to https://mnoble01.github.io/salsify-front-end-test/
 
 
 
