@@ -1,7 +1,6 @@
 import Backbone from 'backbone'
-import bind from 'lodash/bind'
 import titleize from 'titleize'
-import map from 'lodash/map'
+import {bind, map, includes} from 'lodash'
 import {PropertyModel} from 'collections/properties'
 
 const OperatorModel = Backbone.Model.extend({
@@ -11,6 +10,28 @@ const OperatorModel = Backbone.Model.extend({
 
   display () {
     return titleize(this.get('text'))
+  },
+
+  // TODO maybe make this a PropertyValueModel
+  // Use this OperatorModel's operator function to compare a propertyValue
+  compare (propertyValue, value) {
+    switch this.get('id')
+      case this.prototype.EQUALS:
+        return propertyValue === value
+      case this.prototype.GREATER_THAN:
+        return propertyValue > value
+      case this.prototype.LESS_THAN:
+        return propertyValue < value
+      case this.prototype.ANY:
+        return true
+      case this.prototype.NONE:
+        return propertyValue === null || propertyValue === undefined
+      case this.prototype.IS_ANY_OF:
+        return includes(propertyValue, value) // array includes
+      case this.prototype.CONTAINS:
+        return (propertyValue || '').includes(value) // string includes
+      default:
+        return false
   }
 }, {
   //

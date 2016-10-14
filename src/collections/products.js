@@ -20,6 +20,7 @@ const ProductCollection = Backbone.Collection.extend({
   model: ProductModel,
 
   fetch () {
+    // THIS IS A COLLECTION OF PROPERTY VALUES....
     const products = window.getProducts().map((p) => {
       // TODO nested collection
       const properties = p.property_values.map(prop => ({id: prop.property_id, value: prop.value}))
