@@ -1,10 +1,10 @@
 import React, {Component} from 'react'
 import BackboneReactComponent from 'backbone-react-component'
-import {BasicForm, SelectField} from 'react-serial-forms'
+import {BasicForm, SelectField, InputField} from 'react-serial-forms'
 
 import ProductCollection from 'collections/products'
-import PropertyCollection from 'collections/properties'
-import OperatorCollection from 'collections/operators'
+import {PropertyModel, PropertyCollection} from 'collections/properties'
+import {OperatorModel, OperatorCollection} from 'collections/operators'
 import Header from 'components/header'
 import ProductList from 'components/product-list'
 
@@ -86,29 +86,8 @@ export default class FilterProducts extends Component {
   }
 
   renderForm () {
-    const properties = [
-      {text: '- Choose a property', value: null},
-      ...this.state.propertyCollection.map(p => ({text: p.display(), value: p.id}))
-    ]
+    const properties = this.getProperties()
     const operators = this.getOperators()
-    // For property values:
-    // if propertyId is selected,
-    //
-    //   STRING: text input
-    // if operatorId == CONTAINS
-    //   show text input
-    // if operatorId == EQUAL,
-    //   if STRING, text input
-    //   if NUMBER, text input, number validation
-    // if operatorId == GREATER_THAN, LESS_THAN
-    //   show text input, number validation
-    // if operatorId == NO_VALUE || ANY_VALUE
-    //   hide propertyValue
-    // if operatorId == IS_ANY_OF
-    //   show tags or multiselect
-    const propertyValues = [
-    ]
-
     return (
       <BasicForm ref='form' onChange={this.onSubmit} onSubmit={this.onSubmit} >
         <label htmlFor='propertyId'>Property</label>
@@ -116,16 +95,83 @@ export default class FilterProducts extends Component {
         <label htmlFor='operatorId'>Operator</label>
         <SelectField name='operatorId' options={operators} validation='required' />
         <label htmlFor='propertyValue'>Value</label>
-        <SelectField name='propertyValue' options={propertyValues} validation='required' />
+        {this.renderPropertyValue()}
         <button name='submit' type='submit' value='Submit'>Filter</button>
       </BasicForm>
     )
   }
 
-  getOperators () {
+  renderPropertyValue () {
+    const propType = this.getSelectedPropertyType()
+    const opId = this.getSelectedOperatorId()
+    const TYPES = PropertyModel.TYPES
+    const OPS = OperatorModel.IDS
+
+    switch (opId) {
+      case OPS.LESS_THAN:
+      case OPS.GREATER_THAN:
+        return <InputField type='number' name='propertyValue' validation='required' />
+      case OPS.CONTAINS:
+        return (
+          <InputField type='text' name='propertyValue' validation='required' />
+        )
+      case OPS.IS_ANY_OF: {
+        // TODO string, number, enumerated
+        // tags for string/number
+        if (propType === TYPES.ENUMERATED) {
+          const propertyValues = []
+          // property values = products where product.get('propertyValueCollection') contains
+          // selected property
+          return (
+            <SelectField multiple={true} name='propertyValue' options={propertyValues} validation='required' />
+          )
+        }
+        return <InputField type='text' name='propertyValue' validation='required' />
+      }
+      case OPS.EQUALS: {
+        if (propType === TYPES.ENUMERATED) {
+          // const propertyValues = this.state.
+          // property values = products where product.get('propertyValueCollection') contains
+          // selected property
+          const propertyValues = []
+          return (
+            <SelectField name='propertyValue' options={propertyValues} validation='required' />
+          )
+        }
+        const inputType = propType === TYPES.NUMBER ? 'number' : 'text'
+        return (
+          <InputField type={inputType} name='propertyValue' validation='required' />
+        )
+      }
+      case OPS.ANY:
+      case OPS.NONE:
+      default:
+        // empty
+        return (<div></div>)
+    }
+  }
+
+  // returns a string of the currently selected property type
+  getSelectedPropertyType () {
     const selectedPropertyId = parseInt(this.state.filter.propertyId, 10)
     const selectedPropertyModel = this.state.propertyCollection.get(selectedPropertyId)
-    const selectedPropertyType = selectedPropertyModel && selectedPropertyModel.get('type')
+    return selectedPropertyModel && selectedPropertyModel.get('type')
+  }
+
+  // returns a string of the currently selected operator id
+  getSelectedOperatorId () {
+    return this.state.filter.operatorId
+  }
+
+  getProperties () {
+    return [
+      {text: '- Choose a property', value: null},
+      ...this.state.propertyCollection.map(p => ({text: p.display(), value: p.id}))
+    ]
+  }
+
+  getOperators () {
+    const selectedPropertyType = this.getSelectedPropertyType()
     let operators = []
     console.log('selectedPropertyType', selectedPropertyType)
     if (selectedPropertyType) {

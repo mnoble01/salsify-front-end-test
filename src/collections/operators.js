@@ -17,19 +17,19 @@ const OperatorModel = Backbone.Model.extend({
   // Use this OperatorModel's operator function to compare a propertyValue
   compare (propertyValue, value) {
     switch (this.get('id')) {
-      case this.prototype.EQUALS:
+      case OperatorModel.EQUALS:
         return propertyValue === value
-      case this.prototype.GREATER_THAN:
+      case OperatorModel.GREATER_THAN:
         return propertyValue > value
-      case this.prototype.LESS_THAN:
+      case OperatorModel.LESS_THAN:
         return propertyValue < value
-      case this.prototype.ANY:
+      case OperatorModel.ANY:
         return true
-      case this.prototype.NONE:
+      case OperatorModel.NONE:
         return propertyValue === null || propertyValue === undefined
-      case this.prototype.IS_ANY_OF:
+      case OperatorModel.IS_ANY_OF:
         return includes(propertyValue, value) // array includes
-      case this.prototype.CONTAINS:
+      case OperatorModel.CONTAINS:
         return (propertyValue || '').includes(value) // string includes
       default:
         return false
