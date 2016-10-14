@@ -86,31 +86,26 @@ export default class FilterProducts extends Component {
   }
 
   renderForm () {
-    // TODO I think propertyValue has to be a text input based on the type of property chosen...
-    // const selectedPropertyId = this.state.filter.propertyId
-    // const selectedPropertyModel = this.state.propertyCollection.get(this.state.filter.propertyId)
-    // const selectedOperatorId = this.state.filter.selectedOperatorId
-    // const selectedOperatorModel = selectedOperatorId && this.state.operatorCollection.get(selectedOperatorId)
-    // console.log('selected property model', selectedPropertyModel)
-    // console.log('selected operator model', selectedOperatorModel)
     const properties = [
       {text: '- Choose a property', value: null},
       ...this.state.propertyCollection.map(p => ({text: p.display(), value: p.id}))
     ]
     const operators = this.getOperators()
-    // if (selectedPropertyModel) {
-    //   operators = [
-    //     {text: '- Choose an operator', value: null},
-    //     ...this.state.operatorCollection.forPropertyType(selectedPropertyModel.id).map((o) =>
-    //       ({text: o.display(), value: o.id})
-    //     )
-    //   ]
-    // } else {
-    //   operators = [
-    //     {text: '- Choose an operator', value: null},
-    //     ...this.state.operatorCollection.map(o => ({text: o.display(), value: o.id}))
-    //   ]
-    // }
+    // For property values:
+    // if propertyId is selected,
+    //
+    //   STRING: text input
+    // if operatorId == CONTAINS
+    //   show text input
+    // if operatorId == EQUAL,
+    //   if STRING, text input
+    //   if NUMBER, text input, number validation
+    // if operatorId == GREATER_THAN, LESS_THAN
+    //   show text input, number validation
+    // if operatorId == NO_VALUE || ANY_VALUE
+    //   hide propertyValue
+    // if operatorId == IS_ANY_OF
+    //   show tags or multiselect
     const propertyValues = [
     ]
 

@@ -41,6 +41,7 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-spec-reporter": "0.0.26",
+    "lodash": "^4.16.4",
     "react": "^0.14.0",
     "react-addons-test-utils": "^15.3.2",
     "react-dom": "^15.3.2",
@@ -51,18 +52,14 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "browserify-shim": {
-    "datastore": {
-      "path": "src/lib/datastore.js",
-      "exports": "datastore"
-    }
+    "datastore": "datastore"
   },
   "browser": {
     "datastore": "./src/lib/datastore.js"
   },
-  "browserify-shim": {
-    "datastore": "datastore"
-  },
   "browserify": {
-    "transform": ["browserify-shim"]
+    "transform": [
+      "browserify-shim"
+    ]
   }
 }
