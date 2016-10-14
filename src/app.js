@@ -15,8 +15,8 @@ export class App extends Component {
       <div>
         <section id='sidebar'>
           <h4>
-            Gulp Starter Project
-            <span className='smile'>:)</span>
+            Product Salsifylter
+            <span className='fire'></span>
           </h4>
           <Nav links={NAV_LINKS} />
         </section>

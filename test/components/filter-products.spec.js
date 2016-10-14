@@ -1,7 +1,7 @@
 import React from 'react'
 import {mount, render} from 'enzyme'
 
-import Home from 'components/home'
+import Home from 'components/filter-products'
 import Header from 'components/header'
 import NAV_LINKS from 'lib/nav-links'
 
@@ -11,7 +11,7 @@ function wrapper () {
   return mount(<Home route={route}/>)
 }
 
-describe('(Component) Home', () => {
+describe('(Component) FilterProducts', () => {
   it('has an id equal to route path', () => {
     expect(wrapper().find('div').is(`#${NAV_LINKS[0].path}`)).toBe(true)
   })
@@ -21,6 +21,6 @@ describe('(Component) Home', () => {
   })
 
   it('has page content', () => {
-    expect(wrapper().text()).toContain('Page content here')
+    expect(wrapper().text()).toNotEqual('')
   })
 })
