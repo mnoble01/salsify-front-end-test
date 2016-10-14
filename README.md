@@ -1,15 +1,5 @@
 # salsify-front-end-test
 
-# Personalize
-- Edit `package.json`
-  - `name`
-  - `description`
-  - `repository.url`
-- Add `src/favicon.ico` file
-- Edit `src/index.html`
-  - `<title>`
-
-# Commands
 #### Setup
 `npm install`
 
