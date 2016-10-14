@@ -189,6 +189,22 @@ form {
     .serial-input-wrapper {
       clear: right;
     }
+    .property-values {
+      display: block;
+      float: left;
+      margin: @padding/2 0 0 @padding;
+      .serial-input-wrapper {
+        margin-left: @padding/2;
+        clear: left;
+        &:not(:first-child) {
+          margin-top: @padding/2;
+        }
+      }
+      button {
+        margin-left: @padding/2;
+        padding: 2px 5px;
+      }
+    }
   }
   .product-list {
     margin-top: @padding;
@@ -203,11 +219,28 @@ form {
   .product {
     width: 100%;
     padding: @padding/2 0;
+    float: left;
     &:not(:last-child) {
       border-bottom: 1px solid darken(@paleGray, 10%);
     }
     .product-name {
       font-weight: bolder;
+    }
+    .properties {
+      margin-top: @padding/2;
+      font-size: small;
+      color: @gray;
+      .property {
+        display: inline-block;
+        float: left;
+        margin-left: @padding/2;
+        &:not(:first-child):before {
+          content: ' • ';
+        }
+        span:first-child {
+          font-weight: bold;
+        }
+      }
     }
   }
 }

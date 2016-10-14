@@ -1,6 +1,8 @@
 import React, {Component} from 'react'
 import BackboneReactComponent from 'backbone-react-component'
 import {BasicForm, SelectField, InputField} from 'react-serial-forms'
+import ReactTags from 'react-tag-autocomplete'
+import includes from 'lodash/includes'
 
 import ProductCollection from 'collections/products'
 import {PropertyModel, PropertyCollection} from 'collections/properties'
@@ -18,15 +20,16 @@ export default class FilterProducts extends Component {
 
   constructor (...args) {
     super(...args)
-
     this.state = {
       collection: new ProductCollection(),
       propertyCollection: new PropertyCollection(),
       operatorCollection: new OperatorCollection(),
-      filter: {}
+      filter: {},
+      propertyValueTags: []
     }
-
     this.onSubmit = this.onSubmit.bind(this)
+    this.onTagDelete = this.onTagDelete.bind(this)
+    this.onTagAdd = this.onTagAdd.bind(this)
   }
 
   componentWillMount () {
@@ -48,15 +51,6 @@ export default class FilterProducts extends Component {
       this.setState({hasValidFilter: true, filter})
     })
   }
-
-  // hasValidFilter () {
-
-  // }
-
-  // filterProducts (property, operator, value) {
-  //   console.log('filterProducts', this.propertyCollection)
-  //   console.log(property, operator, value)
-  // }
 
   render () {
     return (
@@ -80,75 +74,25 @@ export default class FilterProducts extends Component {
       })
       console.log('filteredModels', filteredModels)
       const filteredCollection = new ProductCollection(filteredModels)
-      return (<ProductList collection={filteredCollection} />)
+      return (<ProductList collection={filteredCollection} properties={this.state.propertyCollection} />)
     }
-    return (<ProductList collection={this.state.collection} />)
+    return (<ProductList collection={this.state.collection} properties={this.state.propertyCollection} />)
   }
 
   renderForm () {
     const properties = this.getProperties()
     const operators = this.getOperators()
     return (
-      <BasicForm ref='form' onChange={this.onSubmit} onSubmit={this.onSubmit} >
+      <BasicForm ref='form' onSubmit={this.onSubmit} >
         <label htmlFor='propertyId'>Property</label>
-        <SelectField name='propertyId' options={properties} validation='required' />
+        <SelectField name='propertyId' options={properties} validation='required' onChange={this.onSubmit} />
         <label htmlFor='operatorId'>Operator</label>
-        <SelectField name='operatorId' options={operators} validation='required' />
+        <SelectField name='operatorId' options={operators} validation='required' onChange={this.onSubmit} />
         <label htmlFor='propertyValue'>Value</label>
         {this.renderPropertyValue()}
         <button name='submit' type='submit' value='Submit'>Filter</button>
       </BasicForm>
     )
-  }
-
-  renderPropertyValue () {
-    const propType = this.getSelectedPropertyType()
-    const opId = this.getSelectedOperatorId()
-    const TYPES = PropertyModel.TYPES
-    const OPS = OperatorModel.IDS
-
-    switch (opId) {
-      case OPS.LESS_THAN:
-      case OPS.GREATER_THAN:
-        return <InputField type='number' name='propertyValue' validation='required' />
-      case OPS.CONTAINS:
-        return (
-          <InputField type='text' name='propertyValue' validation='required' />
-        )
-      case OPS.IS_ANY_OF: {
-        // TODO string, number, enumerated
-        // tags for string/number
-        if (propType === TYPES.ENUMERATED) {
-          const propertyValues = []
-          // property values = products where product.get('propertyValueCollection') contains
-          // selected property
-          return (
-            <SelectField multiple={true} name='propertyValue' options={propertyValues} validation='required' />
-          )
-        }
-        return <InputField type='text' name='propertyValue' validation='required' />
-      }
-      case OPS.EQUALS: {
-        if (propType === TYPES.ENUMERATED) {
-          // const propertyValues = this.state.
-          // property values = products where product.get('propertyValueCollection') contains
-          // selected property
-          const propertyValues = []
-          return (
-            <SelectField name='propertyValue' options={propertyValues} validation='required' />
-          )
-        }
-        const inputType = propType === TYPES.NUMBER ? 'number' : 'text'
-        return (
-          <InputField type={inputType} name='propertyValue' validation='required' />
-        )
-      }
-      case OPS.ANY:
-      case OPS.NONE:
-      default:
-        // empty
-        return (<div></div>)
-    }
   }
 
   // returns a string of the currently selected property type
@@ -183,5 +127,85 @@ export default class FilterProducts extends Component {
     }
     operators.splice(0, 0, {text: '- Choose an operator', value: null})
     return operators
+  }
+
+  renderPropertyValue () {
+    const propType = this.getSelectedPropertyType()
+    const opId = this.getSelectedOperatorId()
+    const TYPES = PropertyModel.TYPES
+    const OPS = OperatorModel.IDS
+
+    switch (opId) {
+      case OPS.LESS_THAN:
+      case OPS.GREATER_THAN:
+        return <InputField type='number' name='propertyValue' validation='required' />
+      case OPS.CONTAINS:
+        return (
+          <InputField type='text' name='propertyValue' validation='required' />
+        )
+      case OPS.IS_ANY_OF: {
+        // TODO string, number, enumerated
+        // tags for string/number
+        if (propType === TYPES.ENUMERATED) {
+          const propertyValues = []
+          // property values = products where product.get('propertyValueCollection') contains
+          // selected property
+          return (
+            <SelectField multiple={true} name='propertyValue' options={propertyValues} validation='required' />
+          )
+        }
+        return (
+          <ReactTags
+            tags={this.state.propertyValueTags}
+            handleDelete={this.onTagDelete}
+            handleAddition={this.onTagAdd}
+            autofocus={true}
+            placeholder=' '
+            minQueryLength={1000} />
+        )
+        // return <InputField type='text' name='propertyValue' validation='required' />
+      }
+      case OPS.EQUALS: {
+        if (propType === TYPES.ENUMERATED) {
+          // const propertyValues = this.state.
+          // property values = products where product.get('propertyValueCollection') contains
+          // selected property
+          const propertyValues = []
+          return (
+            <SelectField name='propertyValue' options={propertyValues} validation='required' />
+          )
+        }
+        const inputType = propType === TYPES.NUMBER ? 'number' : 'text'
+        return (
+          <InputField type={inputType} name='propertyValue' validation='required' />
+        )
+      }
+      case OPS.ANY:
+      case OPS.NONE:
+      default:
+        // empty
+        return (<div></div>)
+    }
+  }
+
+  onTagDelete (i) {
+    const propertyValueTags = this.state.propertyValueTags
+    propertyValueTags.splice(i, 1)
+    this.setState({
+      propertyValueTags
+    })
+  }
+
+  onTagAdd (tag) {
+    const propertyValueTags = this.state.propertyValueTags
+    const existingTagNames = propertyValueTags.map(t => t.name)
+    console.log('onTagAdd', existingTagNames, tag)
+    if (!includes(existingTagNames, tag.name)) { // don't allow duplicates
+      // TODO discard non-numbers for when SELECTED PROPERTY IS NUMERIC
+      propertyValueTags.push(tag)
+      this.setState({
+        propertyValueTags
+      })
+    }
   }
 }

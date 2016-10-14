@@ -79,6 +79,7 @@ const OperatorCollection = Backbone.Collection.extend({
           ID.EQUALS,
           ID.ANY,
           ID.NONE,
+          ID.IS_ANY_OF,
           ID.CONTAINS
         ])
       case PropertyModel.TYPES.NUMBER:

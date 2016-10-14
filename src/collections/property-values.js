@@ -9,7 +9,11 @@ const PropertyValueModel = Backbone.Model.extend({
   },
 
   display () {
-    return titleize(this.get('value'))
+    const value = this.get('value')
+    if (typeof value === 'string') {
+      return titleize(value)
+    }
+    return value
   }
 })
 
