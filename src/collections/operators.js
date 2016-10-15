@@ -30,7 +30,7 @@ const OperatorModel = Backbone.Model.extend({
       case IDS.LESS_THAN:
         return isDefined && propertyValue < value
       case IDS.ANY:
-        return true
+        return isDefined
       case IDS.NONE:
         return !isDefined
       case IDS.IS_ANY_OF:

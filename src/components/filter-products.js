@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import BackboneReactComponent from 'backbone-react-component'
 import {BasicForm, SelectField, InputField} from 'react-serial-forms'
-import {uniqBy, sortBy} from 'lodash'
+import {uniqBy, sortBy, isNaN} from 'lodash'
 
 import ProductCollection from 'collections/products'
 import {PropertyModel, PropertyCollection} from 'collections/properties'
@@ -38,16 +38,21 @@ export default class FilterProducts extends Component {
 
   onSubmit (e) {
     e.preventDefault()
-    this.refs.form.validate((errs, ...args) => {
+    this.refs.form.validate((errs) => {
       const filter = this.refs.form.serialize()
-      // parseInt where needed
-      filter.propertyId = parseInt(filter.propertyId, 10)
+      // validation not working with react-serial-forms when setting back to first <select> value
+      const propId = parseInt(filter.propertyId, 10)
+      if (!isNaN(propId)) {
+        filter.propertyId = propId
+      } else {
+        filter.propertyId = null
+      }
       if (this.getSelectedPropertyType() === PropertyModel.TYPES.NUMBER) {
-        filter.propertyValue = parseInt(filter.propertyValue, 10)
+        filter.propertyValue = filter.propertyValue && parseInt(filter.propertyValue, 10)
       }
       console.log('ON SUBMIT')
+      console.log('errors', errs)
       console.log('filter', filter)
-      console.log('errors', errs, ...args)
       if (errs) {
         console.info(errs)
         this.setState({hasValidFilter: false, filter})
@@ -88,13 +93,12 @@ export default class FilterProducts extends Component {
     const properties = this.getProperties()
     const operators = this.getOperators()
     return (
-      <BasicForm ref='form' onSubmit={this.onSubmit} onChange={this.onSubmit}>
+      <BasicForm ref='form' onSubmit={this.onSubmit}>
         <label htmlFor='propertyId'>Property</label>
-        <SelectField name='propertyId' options={properties} validation='required' />
+        <SelectField name='propertyId' options={properties} validation='required' onChange={this.onSubmit} />
         <label htmlFor='operatorId'>Operator</label>
-        <SelectField name='operatorId' options={operators} validation='required' />
-        <label htmlFor='propertyValue'>Value</label>
-        // {this.renderPropertyValue()}
+        <SelectField name='operatorId' options={operators} validation='required' onChange={this.onSubmit} />
+        {this.renderPropertyValue()}
         <button name='submit' type='submit' value='Submit'>Filter</button>
       </BasicForm>
     )
@@ -118,7 +122,7 @@ export default class FilterProducts extends Component {
 
   getProperties () {
     return [
-      {text: '- Choose a property', value: null},
+      {text: null, value: null},
       ...this.state.propertyCollection.map(p => ({text: p.display(), value: p.id}))
     ]
   }
@@ -126,7 +130,6 @@ export default class FilterProducts extends Component {
   getOperators () {
     const selectedPropertyType = this.getSelectedPropertyType()
     let operators = []
-    console.log('selectedPropertyType', selectedPropertyType)
     if (selectedPropertyType) {
       operators = this.state.operatorCollection.forPropertyType(selectedPropertyType).map(o =>
         ({text: o.display(), value: o.id})
@@ -134,7 +137,7 @@ export default class FilterProducts extends Component {
     } else {
       operators = this.state.operatorCollection.map(o => ({text: o.display(), value: o.id}))
     }
-    operators.splice(0, 0, {text: '- Choose an operator', value: null})
+    operators.splice(0, 0, {text: null, value: null})
     return operators
   }
 
@@ -146,11 +149,15 @@ export default class FilterProducts extends Component {
     switch (opId) {
       case OPS.LESS_THAN:
       case OPS.GREATER_THAN:
-        return <InputField type='number' name='propertyValue' validation='required' />
-      case OPS.CONTAINS:
+      case OPS.CONTAINS: {
+        const inputType = opId === OPS.CONTAINS ? 'text' : 'number'
         return (
-          <InputField type='text' name='propertyValue' validation='required' />
+          <div>
+            <label htmlFor='propertyValue'>Value</label>
+            <InputField type={inputType} name='propertyValue' validation='required' onChange={this.onSubmit} />
+          </div>
         )
+      }
       case OPS.EQUALS:
       case OPS.IS_ANY_OF: {
         const multiple = opId === OPS.IS_ANY_OF
@@ -164,8 +171,11 @@ export default class FilterProducts extends Component {
         availablePropertyValues = uniqBy(availablePropertyValues, 'value')
         availablePropertyValues = sortBy(availablePropertyValues, 'text')
         return (
-          <SelectField multiple={multiple} onChange={this.onSubmit} name='propertyValue'
-            options={availablePropertyValues} validation='required' />
+          <div>
+            <label htmlFor='propertyValue'>Value</label>
+            <SelectField multiple={multiple} onChange={this.onSubmit} name='propertyValue'
+              options={availablePropertyValues} validation='required' />
+          </div>
         )
       }
       case OPS.ANY:
