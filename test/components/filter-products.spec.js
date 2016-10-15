@@ -1,7 +1,8 @@
 import React from 'react'
 import {mount, render} from 'enzyme'
+import sinon from 'sinon'
 
-import Home from 'components/filter-products'
+import FilterProducts from 'components/filter-products'
 import Header from 'components/header'
 import NAV_LINKS from 'lib/nav-links'
 import ProductCollection from 'collections/products'
@@ -9,7 +10,7 @@ import ProductCollection from 'collections/products'
 function wrapper () {
   const route = NAV_LINKS[0]
   route.pageTitle = NAV_LINKS[0].text
-  return mount(<Home route={route}/>)
+  return mount(<FilterProducts route={route}/>)
 }
 
 describe('(Component) FilterProducts', () => {
@@ -21,11 +22,18 @@ describe('(Component) FilterProducts', () => {
     expect(wrapper().find('header').text()).toBe(NAV_LINKS[0].text)
   })
 
-  // it('has a ProductCollection', () => {
-  //   expect(wrapper().state().collection instanceof ProductCollection).toByTruthy()
-  // })
+  it('has a ProductCollection', () => {
+    expect(wrapper().state().collection instanceof ProductCollection).toBeTruthy()
+  })
 
-  // it('has page content', () => {
-  //   expect(wrapper().children().length).toBe('')
+  it('has page content', () => {
+    expect(wrapper().children().length).toBeGreaterThan(0)
+  })
+
+  // it('calls onSubmit on <form> submit', () => {
+  //   const wrap = wrapper()
+  //   const spy = sinon.spy(wrap.onSubmit)
+  //   wrap.find('form').find('button[type=submit]').simulate('click')
+  //   expect(spy.calledOnce).toBeTruthy()
   // })
 })
