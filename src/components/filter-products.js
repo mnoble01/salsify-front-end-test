@@ -27,7 +27,6 @@ export default class FilterProducts extends Component {
       addedPropertyValues: []
     }
     this.onSubmit = this.onSubmit.bind(this)
-    // this.onSelectChange = this.onSelectChange.bind(this)
   }
 
   componentWillMount () {
@@ -40,19 +39,19 @@ export default class FilterProducts extends Component {
     e.preventDefault()
     this.refs.form.validate((errs) => {
       const filter = this.refs.form.serialize()
-      // validation not working with react-serial-forms when setting back to first <select> value
       const propId = parseInt(filter.propertyId, 10)
       if (!isNaN(propId)) {
         filter.propertyId = propId
       } else {
         filter.propertyId = null
       }
-      if (this.getSelectedPropertyType() === PropertyModel.TYPES.NUMBER) {
-        filter.propertyValue = filter.propertyValue && parseInt(filter.propertyValue, 10)
+      if (filter.propertyValue && this.getSelectedPropertyType() === PropertyModel.TYPES.NUMBER) {
+        if (this.getSelectedOperatorId() === OperatorModel.IDS.IS_ANY_OF) {
+          filter.propertyValue = filter.propertyValue.map(v => parseInt(v, 10))
+        } else {
+          filter.propertyValue = parseInt(filter.propertyValue, 10)
+        }
       }
-      console.log('ON SUBMIT')
-      console.log('errors', errs)
-      console.log('filter', filter)
       if (errs) {
         console.info(errs)
         this.setState({hasValidFilter: false, filter})
@@ -74,7 +73,6 @@ export default class FilterProducts extends Component {
 
   renderProductList () {
     if (this.state.hasValidFilter) {
-      console.log(this.state.hasValidFilter, this.state.filter)
       const filteredModels = this.state.collection.filter((prod) => {
         let {propertyId, operatorId, propertyValue} = this.state.filter // eslint-disable-line prefer-const
         const valueModel = prod.get('propertyValueCollection').findWhere({
@@ -92,12 +90,17 @@ export default class FilterProducts extends Component {
   renderForm () {
     const properties = this.getProperties()
     const operators = this.getOperators()
+    const messages = {
+      required: 'This value is required to filter'
+    }
     return (
       <BasicForm ref='form' onSubmit={this.onSubmit}>
         <label htmlFor='propertyId'>Property</label>
-        <SelectField name='propertyId' options={properties} validation='required' onChange={this.onSubmit} />
+        <SelectField name='propertyId' options={properties} onChange={this.onSubmit}
+          validation='required' messages={messages} />
         <label htmlFor='operatorId'>Operator</label>
-        <SelectField name='operatorId' options={operators} validation='required' onChange={this.onSubmit} />
+        <SelectField name='operatorId' options={operators} onChange={this.onSubmit}
+          validation='required' messages={messages} />
         {this.renderPropertyValue()}
         <button name='submit' type='submit' value='Submit'>Filter</button>
       </BasicForm>

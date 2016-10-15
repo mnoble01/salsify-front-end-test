@@ -104,7 +104,8 @@ form {
   }
   label {
     clear: left;
-    &:not(:first-child) {
+    &:not(:first-child),
+    [for=propertyValue] {
       margin-top: @formMargin;
       + .serial-input-wrapper {
         margin-top: @formMargin;
