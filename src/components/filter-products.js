@@ -27,6 +27,7 @@ export default class FilterProducts extends Component {
       addedPropertyValues: []
     }
     this.onSubmit = this.onSubmit.bind(this)
+    // this.onSelectChange = this.onSelectChange.bind(this)
   }
 
   componentWillMount () {
@@ -37,14 +38,16 @@ export default class FilterProducts extends Component {
 
   onSubmit (e) {
     e.preventDefault()
-    this.refs.form.validate((errs) => {
+    this.refs.form.validate((errs, ...args) => {
       const filter = this.refs.form.serialize()
+      // parseInt where needed
       filter.propertyId = parseInt(filter.propertyId, 10)
-      console.log('number??', this.getSelectedPropertyType(), PropertyModel.TYPES.NUMBER)
       if (this.getSelectedPropertyType() === PropertyModel.TYPES.NUMBER) {
         filter.propertyValue = parseInt(filter.propertyValue, 10)
       }
+      console.log('ON SUBMIT')
       console.log('filter', filter)
+      console.log('errors', errs, ...args)
       if (errs) {
         console.info(errs)
         this.setState({hasValidFilter: false, filter})
@@ -66,6 +69,7 @@ export default class FilterProducts extends Component {
 
   renderProductList () {
     if (this.state.hasValidFilter) {
+      console.log(this.state.hasValidFilter, this.state.filter)
       const filteredModels = this.state.collection.filter((prod) => {
         let {propertyId, operatorId, propertyValue} = this.state.filter // eslint-disable-line prefer-const
         const valueModel = prod.get('propertyValueCollection').findWhere({
@@ -84,13 +88,13 @@ export default class FilterProducts extends Component {
     const properties = this.getProperties()
     const operators = this.getOperators()
     return (
-      <BasicForm ref='form' onSubmit={this.onSubmit} >
+      <BasicForm ref='form' onSubmit={this.onSubmit} onChange={this.onSubmit}>
         <label htmlFor='propertyId'>Property</label>
-        <SelectField name='propertyId' options={properties} validation='required' onChange={this.onSubmit} />
+        <SelectField name='propertyId' options={properties} validation='required' />
         <label htmlFor='operatorId'>Operator</label>
-        <SelectField name='operatorId' options={operators} validation='required' onChange={this.onSubmit} />
+        <SelectField name='operatorId' options={operators} validation='required' />
         <label htmlFor='propertyValue'>Value</label>
-        {this.renderPropertyValue()}
+        // {this.renderPropertyValue()}
         <button name='submit' type='submit' value='Submit'>Filter</button>
       </BasicForm>
     )
@@ -111,10 +115,6 @@ export default class FilterProducts extends Component {
   getSelectedOperatorId () {
     return this.state.filter.operatorId
   }
-
-  // getSelectedPropertyValue () {
-  //   return this.state.filter.propertyValue
-  // }
 
   getProperties () {
     return [
@@ -140,9 +140,7 @@ export default class FilterProducts extends Component {
 
   renderPropertyValue () {
     const propId = this.getSelectedPropertyId()
-    const propType = this.getSelectedPropertyType()
     const opId = this.getSelectedOperatorId()
-    const TYPES = PropertyModel.TYPES
     const OPS = OperatorModel.IDS
 
     switch (opId) {
@@ -153,32 +151,9 @@ export default class FilterProducts extends Component {
         return (
           <InputField type='text' name='propertyValue' validation='required' />
         )
-      // case OPS.IS_ANY_OF: {
-      //   // TODO string, number, enumerated
-      //   // tags for string/number
-      //   if (propType === TYPES.ENUMERATED) {
-      //     const propertyValues = []
-      //     // property values = products where product.get('propertyValueCollection') contains
-      //     // selected property
-      //     return (
-      //       <SelectField multiple={true} name='propertyValue' options={propertyValues} validation='required' />
-      //     )
-      //   }
-      //   if (!this.state.addedPropertyValues.length) {
-      //     // add empty property value to begin
-      //     this.addNewPropertyValue(opId, false)
-      //   }
-      //   return (
-      //     <div className='property-values'>
-      //       {this.state.addedPropertyValues.map(pv => pv)}
-      //       <button onClick={() => this.addNewPropertyValue(opId)} className='add' type='button'>+ Add</button>
-      //     </div>
-      //   )
-      //   // return <InputField type='text' name='propertyValue' validation='required' />
-      // }
       case OPS.EQUALS:
       case OPS.IS_ANY_OF: {
-        let multiple = opId === OPS.IS_ANY_OF
+        const multiple = opId === OPS.IS_ANY_OF
         let availablePropertyValues = []
         this.state.collection.each((prod) => {
           const pv = prod.get('propertyValueCollection').findWhere({propertyId: propId})
@@ -189,12 +164,8 @@ export default class FilterProducts extends Component {
         availablePropertyValues = uniqBy(availablePropertyValues, 'value')
         availablePropertyValues = sortBy(availablePropertyValues, 'text')
         return (
-          <SelectField
-            onChange={this.onSubmit}
-            name='propertyValue'
-            multiple={multiple}
-            options={availablePropertyValues}
-            validation='required' />
+          <SelectField multiple={multiple} onChange={this.onSubmit} name='propertyValue'
+            options={availablePropertyValues} validation='required' />
         )
       }
       case OPS.ANY:
@@ -203,31 +174,5 @@ export default class FilterProducts extends Component {
         // empty
         return (<div></div>)
     }
-  }
-
-  addNewPropertyValue (inputType, setState = true) {
-    const values = this.state.addedPropertyValues
-    const newKey = values.length
-    const propertyValueInput = (
-      <div className='property-value' key={newKey}>
-        <InputField type={inputType} validation='required' name={`propertyValues[${newKey}]`}/>
-        {newKey > 0 && <button onClick={() => this.removePropertyValue(newKey)} className='remove'>✕</button>}
-      </div>
-    )
-    values.push(propertyValueInput)
-    if (setState) {
-      this.setState({
-        addedPropertyValues: values
-      })
-      // , this.forceUpdate)
-    }
-  }
-
-  removePropertyValue (index) {
-    const values = this.state.addedPropertyValues
-    values.splice(index, 1)
-    this.setState({
-      addedPropertyValues: values
-    })
   }
 }

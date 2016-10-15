@@ -98,41 +98,23 @@ form {
   display: block;
   clear: both;
   label,
-  .serial-input-wrapper,
-  .react-tags {
+  .serial-input-wrapper {
     display: block;
     float: left;
-  }
-  .react-tags .react-tags__selected:not(:empty) + .react-tags__search {
-    margin-top: @formMargin;
   }
   label {
     clear: left;
     &:not(:first-child) {
       margin-top: @formMargin;
-      + .serial-input-wrapper,
-      + .react-tags {
+      + .serial-input-wrapper {
         margin-top: @formMargin;
       }
     }
-    + .serial-input-wrapper,
-    + .react-tags {
+    + .serial-input-wrapper {
       padding-left: @padding;
     }
     .hint {
       display: block;
-    }
-  }
-  .react-tags {
-    .react-tags__suggestions li mark {
-      /* text-decoration: underline; */
-      background: @pink;
-      font-weight: normal; /* 600 */
-      margin-right: -2px;
-      color: inherit;
-    }
-    .react-tags__selected-tag:not(:first-child) {
-      margin-left: @formMargin/2;
     }
   }
   .serial-input-wrapper .err-msg {
@@ -205,6 +187,9 @@ form {
           margin-top: @padding/2;
         }
       }
+    }
+    select[multiple] {
+      min-width: 140px;
     }
   }
   .product-list {
