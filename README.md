@@ -36,7 +36,7 @@ About 7.5 hours
   - `src/lib` contains the navigation menu, with links from the menu items to top-level content components
   - `src/index.html` is a very simple index file
   - `src/style.less` is where the css lives
-- `test/` contains limited tests (see below in Development Notes)
+- `test/` contains limited tests (see [below](#notes-and-thoughts))
 
 ## Notes (stream of consciousness while developing)
 
