@@ -25,7 +25,7 @@ const PATHS = {
   JS: path.join(DIRS.SRC, '**/*.js'),
   HTML: path.join(DIRS.SRC, '**/*.html'),
   CSS: path.join(DIRS.SRC, '**/*.less'),
-  IMAGES: [path.join(DIRS.SRC, 'favicon.png'), path.join(DIRS.SRC, '*images/**/*')],
+  IMAGES: [path.join(DIRS.SRC, 'favicon.ico'), path.join(DIRS.SRC, '*images/**/*')],
   TEST: path.join(DIRS.TEST, '**/*.spec.js')
 }
 
