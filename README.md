@@ -57,20 +57,20 @@ About 7.5 hours
 - Every model gets a basic display method because I think a model should know how it wants to be represented in the general case. Maybe a better place for this would be a `ViewModel` or even a small React `Component`.
 - Pseudo-code outline before writing code for form inputs:
 ```
-// if operatorId == CONTAINS
-//   show text input
-// if operatorId == GREATER_THAN, LESS_THAN
-//   show text input, number validation
-// if operatorId == NO_VALUE || ANY_VALUE
-//   hide propertyValue
-// if operatorId == EQUAL,
-//   if propertyValue == STRING, text input
-//   if propertyValue == NUMBER, text input, number validation
-//   if propertyValue == ENUM, select field
-// if operatorId == IS_ANY_OF
-//   if propertyValue == STRING, multiple text input
-//   if propertyValue == NUMBER, multiple text input, number validation
-//   if propertyValue == ENUM, multiselect field
+    // if operatorId == CONTAINS
+    //   show text input
+    // if operatorId == GREATER_THAN, LESS_THAN
+    //   show text input, number validation
+    // if operatorId == NO_VALUE || ANY_VALUE
+    //   hide propertyValue
+    // if operatorId == EQUAL,
+    //   if propertyValue == STRING, text input
+    //   if propertyValue == NUMBER, text input, number validation
+    //   if propertyValue == ENUM, select field
+    // if operatorId == IS_ANY_OF
+    //   if propertyValue == STRING, multiple text input
+    //   if propertyValue == NUMBER, multiple text input, number validation
+    //   if propertyValue == ENUM, multiselect field
 ```
 - An `OperatorModel` should know how to compare its LHS and RHS. See `OperatorModel.compare`
 - You'll see `typeof X === 'string'` in some places. It would have been a little more complicated to associate `ProductValueModels` with their `PropertyTypeModel`. Not too complicated, but enough to warrant not doing it for this small project.
