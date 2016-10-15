@@ -22,7 +22,6 @@
 `gulp deploy` to https://mnoble01.github.io/salsify-front-end-test/
 
 
-
 # Salsify Properties Types/Operators
 
 Operators define the relationship between properties and property values. Certain operators are only valid for certain property types, operator behavior and valid operators for each property type are defined as follows:
