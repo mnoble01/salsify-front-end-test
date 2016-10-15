@@ -38,7 +38,7 @@ About 7.5 hours
   - `src/style.less` is where the css lives
 - `test/` contains limited tests (see below in Development Notes)
 
-## Development Notes (stream of consciousness while developing)
+## Notes (stream of consciousness while developing)
 
 ### Things I need to work on, as evidenced by this project
 - React
